@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.KeyGenerator;
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -62,5 +64,12 @@ public class JwtServiceImpl implements JwtService {
     public boolean isTokenValid(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !extractExpiration(token).before(new Date()));
+    }
+
+    //USED FOR SHA256 TOKEN GENERATION
+    private String generateSecureKey() throws Exception {
+        KeyGenerator keyGen = KeyGenerator.getInstance("HmacSHA256");
+        keyGen.init(256);
+        return Base64.getEncoder().encodeToString(keyGen.generateKey().getEncoded());
     }
 }

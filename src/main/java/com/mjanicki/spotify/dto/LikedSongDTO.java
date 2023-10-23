@@ -3,15 +3,18 @@ package com.mjanicki.spotify.dto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 @Data
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
-public class SongDTO {
+public class LikedSongDTO {
+    
+    @NonNull
+    private SongDTO song;
 
-    private Integer id;
-
-    private String title, author, songPath, imagePath;
-
+    @NonNull
     private UserDTO user;
 }

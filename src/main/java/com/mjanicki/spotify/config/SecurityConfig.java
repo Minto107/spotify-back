@@ -36,11 +36,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request ->
                     request.requestMatchers(new AntPathRequestMatcher("/auth/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/songs/**")).permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider()).addFilterBefore(
                         filter, UsernamePasswordAuthenticationFilter.class);
-//        http.csrf().disable();
         return http.build();
     }
 

@@ -26,7 +26,6 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public ResponseEntity<List<SongDTO>> getSongs() {
-        //TODO create DTO objects
         List<SongDTO> songs = new ArrayList<>();
 
         songRepository.findAll().forEach(e -> {
@@ -40,7 +39,6 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public ResponseEntity<SongDTO> getSongByTitle(String title) {
-        //TODO parse as DTO
         Song song = songRepository.findByTitle(title)
                 .orElseThrow(() -> new SongNotFoundException(title));
 

@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,6 +25,7 @@ import java.util.List;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@RequiredArgsConstructor
 @Table(name = "users")
 public class User implements UserDetails {
 
@@ -29,15 +33,18 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
+    @NonNull
     @Column(nullable = false, name = "full_name")
     private String fullName;
 
     @Column(nullable = true, name = "avatar_url")
     private String avatarUrl;
 
+    @NonNull
     @Column(nullable = false)
     private String email;
 
+    @NonNull
     @Column(nullable = false)
     private String password;
 
@@ -55,13 +62,6 @@ public class User implements UserDetails {
     public User(String fullName, String email) {
         this.fullName = fullName;
         this.email = email;
-        this.songs = new ArrayList<>();
-    }
-
-    public User(String fullName, String email, String password) {
-        this.fullName = fullName;
-        this.email = email;
-        this.password = password;
         this.songs = new ArrayList<>();
     }
 

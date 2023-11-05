@@ -3,10 +3,13 @@ package com.mjanicki.spotify.service.security.impl;
 import com.mjanicki.spotify.dao.security.JwtResponse;
 import com.mjanicki.spotify.dao.security.LoginRequest;
 import com.mjanicki.spotify.dao.security.RegisterRequest;
+import com.mjanicki.spotify.dto.UserDTO;
+import com.mjanicki.spotify.helper.UserHelper;
 import com.mjanicki.spotify.repository.UserRepository;
 import com.mjanicki.spotify.service.security.AuthenticationService;
 import com.mjanicki.spotify.service.security.JwtService;
-import lombok.AllArgsConstructor;
+
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +27,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
+    private final UserHelper userHelper;
+
     @Override
     public JwtResponse login(LoginRequest login) {
         authenticationManager.authenticate(
@@ -32,7 +37,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         var user = userRepository.findByEmail(login.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("No user registered with email: " + login.getEmail()));
         var token = jwtService.generateToken(user);
-        return JwtResponse.builder().token(token).build();
+        var dto = UserDTO.builder().id(user.getId()).fullName(user.getFullName())
+                    .avatarUrl(user.getAvatarUrl()).email(user.getEmail()).songs(null).build();
+        return JwtResponse.builder().token(token).user(dto).build();
     }
 
     @Override
@@ -41,6 +48,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .password(passwordEncoder.encode(register.getPassword())).build();
         userRepository.save(user);
         var token = jwtService.generateToken(user);
-        return JwtResponse.builder().token(token).build();
+        var dto = UserDTO.builder().id(user.getId()).fullName(user.getFullName())
+            .avatarUrl(user.getAvatarUrl()).email(user.getEmail()).songs(null).build();
+        return JwtResponse.builder().token(token).user(dto).build();
+    }
+
+    @Override
+    public JwtResponse getUser(HttpServletRequest request) {
+        return userHelper.getJwtResponse(request);
     }
 }

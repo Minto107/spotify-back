@@ -4,6 +4,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import com.mjanicki.spotify.dao.User;
+import com.mjanicki.spotify.dao.security.JwtResponse;
+import com.mjanicki.spotify.dto.UserDTO;
 import com.mjanicki.spotify.exception.UserNotFoundException;
 import com.mjanicki.spotify.repository.UserRepository;
 import com.mjanicki.spotify.service.UserService;
@@ -38,6 +40,19 @@ public class UserHelper {
 
         return userRepository.findByEmail(email)
             .orElseThrow(() -> new UserNotFoundException(email));
+    }
+
+    public JwtResponse getJwtResponse(HttpServletRequest request) {
+        final String header = request.getHeader("Authorization");
+        final String jwt = header.substring(7), email = jwtService.extractUsername(jwt);
+
+        var user = userRepository.findByEmail(email)
+            .orElseThrow(() -> new UserNotFoundException(email));
+
+        var userDto = UserDTO.builder().id(user.getId()).fullName(user.getFullName())
+            .avatarUrl(user.getAvatarUrl()).email(user.getEmail()).songs(null).build();
+
+        return new JwtResponse(email, userDto);
     }
     
 }

@@ -8,5 +8,5 @@ import java.util.List;
 public interface SongService {
     ResponseEntity<List<SongDTO>> getSongs();
 
-    ResponseEntity<SongDTO> getSongByTitle(String title);
+    ResponseEntity<List<SongDTO>> getSongByTitle(String title);
 }

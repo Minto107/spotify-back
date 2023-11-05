@@ -38,13 +38,27 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public ResponseEntity<SongDTO> getSongByTitle(String title) {
-        Song song = songRepository.findByTitle(title)
-                .orElseThrow(() -> new SongNotFoundException(title));
+    public ResponseEntity<List<SongDTO>> getSongByTitle(String title) {
+        if (title.equals("") || title.length() == 0)
+            return getSongs();
+        // Song song = songRepository.findByTitle(title)
+        //         .orElseThrow(() -> new SongNotFoundException(title));
 
-        User tmp = song.getUser();
-        UserDTO userDTO = new UserDTO(tmp.getId(), tmp.getFullName(), tmp.getAvatarUrl(), tmp.getEmail(), null);
+        List<Song> songs = songRepository.findByTitleIgnoreCaseContains(title);
 
-        return ResponseEntity.ok(new SongDTO(song.getId(), song.getTitle(), song.getAuthor(), song.getSongPath(), song.getImagePath(), userDTO));
+        List<SongDTO> dtos = new ArrayList<>();
+        songs.forEach((e) -> {
+            User tmp = e.getUser();
+            UserDTO userDTO = UserDTO.builder().id(tmp.getId()).fullName(tmp.getFullName())
+                                .avatarUrl(tmp.getAvatarUrl()).email(tmp.getEmail()).songs(null).build();
+            dtos.add(SongDTO.builder().id(e.getId()).title(e.getTitle()).author(e.getAuthor())
+                        .songPath(e.getSongPath()).imagePath(e.getImagePath()).user(userDTO).build());
+        });
+
+        // User tmp = song.getUser();
+        // UserDTO userDTO = new UserDTO(tmp.getId(), tmp.getFullName(), tmp.getAvatarUrl(), tmp.getEmail(), null);
+
+        // return ResponseEntity.ok(new SongDTO(song.getId(), song.getTitle(), song.getAuthor(), song.getSongPath(), song.getImagePath(), userDTO));
+        return ResponseEntity.ok(dtos);
     }
 }

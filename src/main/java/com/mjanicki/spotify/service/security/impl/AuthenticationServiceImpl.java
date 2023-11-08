@@ -9,7 +9,9 @@ import com.mjanicki.spotify.repository.UserRepository;
 import com.mjanicki.spotify.service.security.AuthenticationService;
 import com.mjanicki.spotify.service.security.JwtService;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,7 +32,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserHelper userHelper;
 
     @Override
-    public JwtResponse login(LoginRequest login) {
+    public JwtResponse login(LoginRequest login, HttpServletResponse response) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(login.getEmail(), login.getPassword())
         );
@@ -39,11 +41,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         var token = jwtService.generateToken(user);
         var dto = UserDTO.builder().id(user.getId()).fullName(user.getFullName())
                     .avatarUrl(user.getAvatarUrl()).email(user.getEmail()).songs(null).build();
+
+        var cookie = new Cookie("accessToken", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true); //works for localhost as well
+        cookie.setMaxAge(60 * 60 * 24);
+        cookie.setPath("/");
+        cookie.setDomain("localhost");
+        cookie.setAttribute("SameSite", "None");
+
+        response.addCookie(cookie);
+
         return JwtResponse.builder().token(token).user(dto).build();
     }
 
     @Override
-    public JwtResponse register(RegisterRequest register) {
+    public JwtResponse register(RegisterRequest register, HttpServletResponse response) {
         var user = User.builder().fullName(register.getFullName()).email(register.getEmail())
                 .password(passwordEncoder.encode(register.getPassword())).build();
         userRepository.save(user);

@@ -32,11 +32,13 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin())).csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request ->
-                    request.requestMatchers(new AntPathRequestMatcher("/auth/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/songs/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/error/**")).permitAll()
-                        .anyRequest().authenticated())
+                    request
+                    .requestMatchers(new AntPathRequestMatcher("/**", "OPTIONS")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/auth/**")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/h2-console/**")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/songs/**")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/error/**")).permitAll()
+                    .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider()).addFilterBefore(
                         filter, UsernamePasswordAuthenticationFilter.class);

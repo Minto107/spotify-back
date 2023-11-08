@@ -16,6 +16,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 @Component
 @RequiredArgsConstructor
@@ -26,14 +27,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        final String header = request.getHeader("Authorization");
-        final String jwt;
-        final String email;
-        if (!StringUtils.hasLength(header) || !StringUtils.startsWithIgnoreCase(header, "Bearer ")) {
+        final var jwt = getJwtToken(request);
+        if (jwt == null) {
             filterChain.doFilter(request, response);
             return ;
         }
-        jwt = header.substring(7);
+        final String email;
         email = jwtService.extractUsername(jwt);
 
         if (StringUtils.hasLength(email) && SecurityContextHolder.getContext().getAuthentication() == null) {
@@ -47,4 +46,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
         filterChain.doFilter(request, response);
     }
+
+    private String getJwtToken(HttpServletRequest request) {
+        final var cookiesArray = request.getCookies();
+        if (cookiesArray == null) {
+            return null;
+        }
+        final var cookies = Arrays.asList(request.getCookies());
+        final var jwtCookie = cookies.stream()
+            .filter(e -> e.getName().equals("accessToken"))
+            .findFirst().orElse(null);
+        if (jwtCookie == null)
+            return null;
+        return jwtCookie.getValue();
+    }
+
 }

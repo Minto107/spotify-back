@@ -1,5 +1,7 @@
 package com.mjanicki.spotify.helper;
 
+import java.util.Arrays;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -28,24 +30,34 @@ public class UserHelper {
     private UserRepository userRepository;
 
     public UserDetails getUserDetails(HttpServletRequest request) {
-        final String header = request.getHeader("Authorization");
-        final String jwt = header.substring(7), email = jwtService.extractUsername(jwt);
-
+        final var jwtCookie = Arrays.asList(request.getCookies()).stream()
+            .filter(e -> e.getName().equals("accessToken"))
+            .findFirst().orElse(null);
+        
+        final String jwt = jwtCookie.getValue();
+        final String email = jwtService.extractUsername(jwt);
        return userService.userDetailsService().loadUserByUsername(email);
     }
 
     public User getUser(HttpServletRequest request) {
-        final String header = request.getHeader("Authorization");
-        final String jwt = header.substring(7), email = jwtService.extractUsername(jwt);
+        final var jwtCookie = Arrays.asList(request.getCookies()).stream()
+            .filter(e -> e.getName().equals("accessToken"))
+            .findFirst().orElse(null);
+        
+        final String jwt = jwtCookie.getValue();
+        final String email = jwtService.extractUsername(jwt);
 
         return userRepository.findByEmail(email)
             .orElseThrow(() -> new UserNotFoundException(email));
     }
 
     public JwtResponse getJwtResponse(HttpServletRequest request) {
-        final String header = request.getHeader("Authorization");
-        final String jwt = header.substring(7), email = jwtService.extractUsername(jwt);
-
+        final var jwtCookie = Arrays.asList(request.getCookies()).stream()
+            .filter(e -> e.getName().equals("accessToken"))
+            .findFirst().orElse(null);
+        
+        final String jwt = jwtCookie.getValue();
+        final String email = jwtService.extractUsername(jwt);
         var user = userRepository.findByEmail(email)
             .orElseThrow(() -> new UserNotFoundException(email));
 

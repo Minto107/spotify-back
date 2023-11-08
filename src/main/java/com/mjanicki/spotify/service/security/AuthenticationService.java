@@ -5,11 +5,12 @@ import com.mjanicki.spotify.dao.security.LoginRequest;
 import com.mjanicki.spotify.dao.security.RegisterRequest;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 public interface AuthenticationService {
-    JwtResponse login(LoginRequest login);
+    JwtResponse login(LoginRequest login, HttpServletResponse response);
 
-    JwtResponse register(RegisterRequest register);
+    JwtResponse register(RegisterRequest register, HttpServletResponse response);
 
     JwtResponse getUser(HttpServletRequest request);
 }

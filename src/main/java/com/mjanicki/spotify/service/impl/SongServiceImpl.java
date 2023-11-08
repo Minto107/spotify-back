@@ -4,9 +4,12 @@ import com.mjanicki.spotify.dao.Song;
 import com.mjanicki.spotify.dao.User;
 import com.mjanicki.spotify.dto.SongDTO;
 import com.mjanicki.spotify.dto.UserDTO;
-import com.mjanicki.spotify.exception.SongNotFoundException;
+import com.mjanicki.spotify.helper.UserHelper;
 import com.mjanicki.spotify.repository.SongRepository;
 import com.mjanicki.spotify.service.SongService;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -19,9 +22,12 @@ public class SongServiceImpl implements SongService {
 
     private final SongRepository songRepository;
 
+    private final UserHelper userHelper;
+
     @Autowired
-    public SongServiceImpl(SongRepository songRepository) {
+    public SongServiceImpl(SongRepository songRepository, UserHelper userHelper) {
         this.songRepository = songRepository;
+        this.userHelper = userHelper;
     }
 
     @Override
@@ -60,5 +66,23 @@ public class SongServiceImpl implements SongService {
 
         // return ResponseEntity.ok(new SongDTO(song.getId(), song.getTitle(), song.getAuthor(), song.getSongPath(), song.getImagePath(), userDTO));
         return ResponseEntity.ok(dtos);
+    }
+
+    @Override
+    public ResponseEntity<List<SongDTO>> getUserSongs(HttpServletRequest request) {
+        final var user = userHelper.getUser(request);
+        final var userDTO = UserDTO.builder().id(user.getId()).fullName(user.getFullName())
+                            .avatarUrl(user.getAvatarUrl()).email(user.getEmail()).songs(null).build();
+
+        final var userSongs = songRepository.findByUser(user);
+
+        List<SongDTO> songs = new ArrayList<>();
+
+        userSongs.forEach(song -> {
+            songs.add(SongDTO.builder().id(song.getId()).title(song.getTitle())
+                        .author(song.getAuthor()).songPath(song.getSongPath()).imagePath(song.getImagePath())
+                        .user(userDTO).build());
+        });
+        return ResponseEntity.ok(songs);
     }
 }

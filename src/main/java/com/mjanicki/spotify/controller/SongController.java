@@ -1,6 +1,9 @@
 package com.mjanicki.spotify.controller;
 
 import com.mjanicki.spotify.service.SongService;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,5 +30,10 @@ public class SongController {
     @GetMapping("/{title}")
     public ResponseEntity<?> one(@PathVariable("title") String title) {
         return songService.getSongByTitle(title);
+    }
+
+    @GetMapping("/user")
+    public ResponseEntity<?> user(HttpServletRequest request) {
+        return songService.getUserSongs(request);
     }
 }

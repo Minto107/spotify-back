@@ -50,15 +50,19 @@ public class UserHelper {
     }
 
     public JwtResponse getJwtResponse(HttpServletRequest request) {
-        final String jwt = getJwt(request);
-        final String email = getEmail(jwt);
-        final var user = userRepository.findByEmail(email)
-            .orElseThrow(() -> new UserNotFoundException(email));
+        try {
+            final String jwt = getJwt(request);
+            final String email = getEmail(jwt);
+            final var user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
 
-        final var userDto = UserDTO.builder().id(user.getId()).fullName(user.getFullName())
-            .avatarUrl(user.getAvatarUrl()).email(user.getEmail()).songs(null).build();
+            final var userDto = UserDTO.builder().id(user.getId()).fullName(user.getFullName())
+                .avatarUrl(user.getAvatarUrl()).email(user.getEmail()).songs(null).build();
 
-        return new JwtResponse(email, userDto);
+            return new JwtResponse(email, userDto);
+        } catch (NullPointerException ignored) {
+            return null;
+        }
     }
     
     private String getJwt(HttpServletRequest request) throws NullPointerException{

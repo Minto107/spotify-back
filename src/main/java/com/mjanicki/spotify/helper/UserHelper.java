@@ -25,46 +25,49 @@ public class UserHelper {
     private final JwtService jwtService;
     @NonNull
     private final UserService userService;
-
     @NonNull
     private UserRepository userRepository;
 
     public UserDetails getUserDetails(HttpServletRequest request) {
-        final var jwtCookie = Arrays.asList(request.getCookies()).stream()
-            .filter(e -> e.getName().equals("accessToken"))
-            .findFirst().orElse(null);
-        
-        final String jwt = jwtCookie.getValue();
-        final String email = jwtService.extractUsername(jwt);
-       return userService.userDetailsService().loadUserByUsername(email);
+        try {
+            final String jwt = getJwt(request);
+            final String email = getEmail(jwt);
+            return userService.userDetailsService().loadUserByUsername(email);
+        } catch (NullPointerException ignored) {
+            return null;
+        }
     }
 
     public User getUser(HttpServletRequest request) {
-        final var jwtCookie = Arrays.asList(request.getCookies()).stream()
-            .filter(e -> e.getName().equals("accessToken"))
-            .findFirst().orElse(null);
-        
-        final String jwt = jwtCookie.getValue();
-        final String email = jwtService.extractUsername(jwt);
-
-        return userRepository.findByEmail(email)
-            .orElseThrow(() -> new UserNotFoundException(email));
+        try {
+            final String jwt = getJwt(request);
+            final String email = getEmail(jwt);
+            return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
+        } catch (NullPointerException ex) {
+            return null;
+        }
     }
 
     public JwtResponse getJwtResponse(HttpServletRequest request) {
-        final var jwtCookie = Arrays.asList(request.getCookies()).stream()
-            .filter(e -> e.getName().equals("accessToken"))
-            .findFirst().orElse(null);
-        
-        final String jwt = jwtCookie.getValue();
-        final String email = jwtService.extractUsername(jwt);
-        var user = userRepository.findByEmail(email)
+        final String jwt = getJwt(request);
+        final String email = getEmail(jwt);
+        final var user = userRepository.findByEmail(email)
             .orElseThrow(() -> new UserNotFoundException(email));
 
-        var userDto = UserDTO.builder().id(user.getId()).fullName(user.getFullName())
+        final var userDto = UserDTO.builder().id(user.getId()).fullName(user.getFullName())
             .avatarUrl(user.getAvatarUrl()).email(user.getEmail()).songs(null).build();
 
         return new JwtResponse(email, userDto);
     }
     
+    private String getJwt(HttpServletRequest request) throws NullPointerException{
+        return Arrays.asList(request.getCookies()).stream()
+            .filter(e -> e.getName().equals("accessToken"))
+            .findFirst().orElse(null).getValue();
+    }
+
+    private String getEmail(String jwt) {
+        return jwtService.extractUsername(jwt);
+    }
 }

@@ -13,13 +13,15 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import com.mjanicki.spotify.dao.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+@Log4j2
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -68,6 +70,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public JwtResponse getUser(HttpServletRequest request) {
-        return userHelper.getJwtResponse(request);
+        final var jwtResponse = userHelper.getJwtResponse(request);
+        if (jwtResponse == null) {
+            log.warn("Request to get user was received, but no token was provided with the request. Returning empty response.");
+            return new JwtResponse();
+        }
+        return jwtResponse;
     }
 }

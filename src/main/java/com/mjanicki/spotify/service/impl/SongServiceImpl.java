@@ -9,6 +9,7 @@ import com.mjanicki.spotify.repository.SongRepository;
 import com.mjanicki.spotify.service.SongService;
 
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.log4j.Log4j2;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
+@Log4j2
 @Service
 public class SongServiceImpl implements SongService {
 
@@ -39,7 +41,7 @@ public class SongServiceImpl implements SongService {
             UserDTO userDTO = new UserDTO(tmp.getId(), tmp.getFullName(), tmp.getAvatarUrl(), tmp.getEmail(), null);
             songs.add(new SongDTO(e.getId(), e.getTitle(), e.getAuthor(), e.getSongPath(), e.getImagePath(), userDTO));
         });
-
+        log.info(new StringBuilder().append("Found ").append(songs.size()).append(" songs.").toString());
         return ResponseEntity.ok(songs);
     }
 
@@ -71,6 +73,10 @@ public class SongServiceImpl implements SongService {
     @Override
     public ResponseEntity<List<SongDTO>> getUserSongs(HttpServletRequest request) {
         final var user = userHelper.getUser(request);
+        if (user == null) {
+            log.warn("Request to get user songs was received, but no access token was provided with the request. Returning empty list.");
+            return ResponseEntity.ok(new ArrayList<>());
+        }
         final var userDTO = UserDTO.builder().id(user.getId()).fullName(user.getFullName())
                             .avatarUrl(user.getAvatarUrl()).email(user.getEmail()).songs(null).build();
 

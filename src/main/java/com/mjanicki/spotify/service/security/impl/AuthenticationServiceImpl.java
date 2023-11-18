@@ -49,6 +49,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         cookie.setSecure(true); //works for localhost as well
         cookie.setMaxAge(60 * 60 * 24);
         cookie.setPath("/");
+        //TODO change domain to value that will be read from config file
         cookie.setDomain("localhost");
         cookie.setAttribute("SameSite", "None");
 
@@ -66,6 +67,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         var dto = UserDTO.builder().id(user.getId()).fullName(user.getFullName())
             .avatarUrl(user.getAvatarUrl()).email(user.getEmail()).songs(null).build();
         return JwtResponse.builder().token(token).user(dto).build();
+    }
+
+    @Override
+    public void logout(HttpServletResponse response) {
+        var cookie = new Cookie("accessToken", null);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setMaxAge(1);
+        cookie.setPath("/");
+        cookie.setDomain("localhost");
+        cookie.setAttribute("SameSite", "None");
+        
+        response.addCookie(cookie);
     }
 
     @Override

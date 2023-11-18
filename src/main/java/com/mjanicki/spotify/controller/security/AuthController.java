@@ -27,6 +27,12 @@ public class AuthController {
         return ResponseEntity.ok(service.register(request, response));
     }
 
+    @GetMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        service.logout(response);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/user")
     public ResponseEntity<?> getUser(HttpServletRequest request) {
         return ResponseEntity.ok(service.getUser(request));

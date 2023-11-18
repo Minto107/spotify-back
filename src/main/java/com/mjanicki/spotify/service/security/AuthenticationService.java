@@ -12,5 +12,7 @@ public interface AuthenticationService {
 
     JwtResponse register(RegisterRequest register, HttpServletResponse response);
 
+    void logout(HttpServletResponse response);
+
     JwtResponse getUser(HttpServletRequest request);
 }

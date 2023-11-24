@@ -21,5 +21,4 @@ public class LikedSongController {
     public ResponseEntity<?> all(HttpServletRequest request) {
         return service.getLikedSongsForUser(request);
     }
-    
 }

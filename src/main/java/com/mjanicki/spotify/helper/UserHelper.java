@@ -30,45 +30,55 @@ public class UserHelper {
 
     public UserDetails getUserDetails(HttpServletRequest request) {
         try {
-            final String jwt = getJwt(request);
-            final String email = getEmail(jwt);
-            return userService.userDetailsService().loadUserByUsername(email);
+            final var jwt = getJwt(request);
+            if (jwt != null) {
+                final String email = getEmail(jwt);
+                return userService.userDetailsService().loadUserByUsername(email);
+            }
         } catch (NullPointerException ignored) {
-            return null;
+            //
         }
+        return null;
     }
 
     public User getUser(HttpServletRequest request) {
         try {
-            final String jwt = getJwt(request);
-            final String email = getEmail(jwt);
-            return userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(email));
+            final var jwt = getJwt(request);
+            if (jwt != null) {
+                final String email = getEmail(jwt);
+                return userRepository.findByEmail(email)
+                    .orElseThrow(() -> new UserNotFoundException(email));
+            }
         } catch (NullPointerException ex) {
-            return null;
+            //
         }
+        return null;
     }
 
     public JwtResponse getJwtResponse(HttpServletRequest request) {
         try {
-            final String jwt = getJwt(request);
-            final String email = getEmail(jwt);
-            final var user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException(email));
+            final var jwt = getJwt(request);
+            if (jwt != null) {
+                final String email = getEmail(jwt);
+                final var user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new UserNotFoundException(email));
 
-            final var userDto = UserDTO.builder().id(user.getId()).fullName(user.getFullName())
-                .avatarUrl(user.getAvatarUrl()).email(user.getEmail()).songs(null).build();
+                final var userDto = UserDTO.builder().id(user.getId()).fullName(user.getFullName())
+                    .avatarUrl(user.getAvatarUrl()).email(user.getEmail()).songs(null).build();
 
-            return new JwtResponse(email, userDto);
-        } catch (NullPointerException ignored) {
-            return null;
+                return new JwtResponse(email, userDto);
         }
+        } catch (NullPointerException ignored) {
+            //
+        }
+        return null;
     }
     
     private String getJwt(HttpServletRequest request) throws NullPointerException{
         return Arrays.asList(request.getCookies()).stream()
             .filter(e -> e.getName().equals("accessToken"))
-            .findFirst().orElse(null).getValue();
+            .map(cookie -> "".equals(cookie.getValue()) ? null : cookie.getValue())
+            .findFirst().orElse(null);
     }
 
     private String getEmail(String jwt) {

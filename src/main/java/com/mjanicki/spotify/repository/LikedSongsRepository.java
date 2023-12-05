@@ -11,4 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface LikedSongsRepository extends JpaRepository<LikedSong, LikedSongId> {
     
     List<LikedSong> findByUser(User user);
+
+    // LikedSong findByUserAndId(User user, LikedSongId id);
 }

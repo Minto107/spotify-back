@@ -1,6 +1,8 @@
 package com.mjanicki.spotify.dao;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -8,8 +10,10 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.sql.Timestamp;
 
 @Entity
+@Builder
 @Table(name = "liked_songs")
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class LikedSong {
 

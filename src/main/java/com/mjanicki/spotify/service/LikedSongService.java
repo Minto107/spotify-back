@@ -11,4 +11,8 @@ import jakarta.servlet.http.HttpServletRequest;
 public interface LikedSongService {
     
     ResponseEntity<List<LikedSongDTO>> getLikedSongsForUser(HttpServletRequest request);
+
+    ResponseEntity<?> isLiked(HttpServletRequest request, Integer id);
+
+    ResponseEntity<?> handleLike(HttpServletRequest request, Integer id);
 }

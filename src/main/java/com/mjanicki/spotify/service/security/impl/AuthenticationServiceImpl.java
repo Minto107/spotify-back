@@ -44,16 +44,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         var dto = UserDTO.builder().id(user.getId()).fullName(user.getFullName())
                     .avatarUrl(user.getAvatarUrl()).email(user.getEmail()).songs(null).build();
 
-        var cookie = new Cookie("accessToken", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true); //works for localhost as well
-        cookie.setMaxAge(60 * 60 * 24);
-        cookie.setPath("/");
-        //TODO change domain to value that will be read from config file
-        cookie.setDomain("localhost");
-        cookie.setAttribute("SameSite", "None");
-
-        response.addCookie(cookie);
+        response.addCookie(createJwtCookie(token));
 
         return JwtResponse.builder().token(token).user(dto).build();
     }
@@ -66,6 +57,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         var token = jwtService.generateToken(user);
         var dto = UserDTO.builder().id(user.getId()).fullName(user.getFullName())
             .avatarUrl(user.getAvatarUrl()).email(user.getEmail()).songs(null).build();
+        response.addCookie(createJwtCookie(token));
         return JwtResponse.builder().token(token).user(dto).build();
     }
 
@@ -90,5 +82,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             return new JwtResponse();
         }
         return jwtResponse;
+    }
+
+    private Cookie createJwtCookie(String token) {
+        var cookie = new Cookie("accessToken", token);
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true); //works for localhost as well
+        cookie.setMaxAge(60 * 60 * 24);
+        cookie.setPath("/");
+        //TODO change domain to value that will be read from config file
+        cookie.setDomain("localhost");
+        cookie.setAttribute("SameSite", "None");
+
+        return cookie;
     }
 }

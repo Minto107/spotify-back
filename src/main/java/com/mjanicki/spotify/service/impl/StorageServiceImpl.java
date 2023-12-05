@@ -53,10 +53,11 @@ public class StorageServiceImpl implements StorageService {
             final Path location = Paths.get(saveLocation);
             Files.copy(file.getInputStream(), location.resolve(fileName));
             return saveLocation + fileName;
-            } catch (Exception e) {
+        } catch (Exception e) {
             if (e instanceof FileAlreadyExistsException) throw new RuntimeException("A file of that name already exists.");
-            throw new RuntimeException(e.getMessage());
+            e.printStackTrace();
             }
+        return null;
     }
     
 }
